@@ -4,6 +4,42 @@ import YAML from 'yaml';
 const SUPERPOWERS_START = '# --- SUPERPOWERS:START ---';
 const SUPERPOWERS_END = '# --- SUPERPOWERS:END ---';
 
+export async function injectIntoMarkdown(targetMdPath, patchMdPath) {
+  const mdContent = fs.readFileSync(targetMdPath, 'utf8');
+  const patchContent = fs.readFileSync(patchMdPath, 'utf8');
+
+  // Check if already injected
+  if (mdContent.includes(SUPERPOWERS_START)) {
+    return { injected: false, skipped: true, description: 'already installed' };
+  }
+
+  // Extract description from patch file (first line after #)
+  const descriptionMatch = patchContent.match(/^#\s*(.+)$/m);
+  const description = descriptionMatch ? descriptionMatch[1].trim() : 'Superpowers';
+
+  // Extract principles from patch (lines starting with -)
+  const patchPrinciples = patchContent
+    .split('\n')
+    .filter(line => line.trim().startsWith('-'))
+    .map(line => line.trim())
+    .join('\n');
+
+  // Append superpowers to end of file
+  const newContent = `${mdContent.trim()}
+
+---
+
+${SUPERPOWERS_START}
+## Superpowers Enhancement
+
+${patchPrinciples}
+${SUPERPOWERS_END}
+`;
+
+  fs.writeFileSync(targetMdPath, newContent);
+  return { injected: true, skipped: false, description };
+}
+
 export async function injectIntoBmad(targetYamlPath, patchMdPath) {
   const yamlContent = fs.readFileSync(targetYamlPath, 'utf8');
   const patchContent = fs.readFileSync(patchMdPath, 'utf8');

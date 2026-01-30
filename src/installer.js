@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { injectIntoBmad } from './bmad-injector.js';
+import { injectIntoBmad, injectIntoMarkdown } from './bmad-injector.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,26 +63,40 @@ async function installBmadMode(targetDir, bmadAgentsPath) {
   const patchesDir = path.join(PACKAGE_ROOT, 'src', 'patches');
   const additionsDir = path.join(PACKAGE_ROOT, 'bmad-additions');
 
-  // Inject patches into existing agents
+  // Inject patches into existing agents (supports both .yaml and .md formats)
   const patchMappings = [
-    { patch: 'dev.principles.md', target: 'dev.agent.yaml' },
-    { patch: 'architect.principles.md', target: 'architect.agent.yaml' },
-    { patch: 'sm.principles.md', target: 'sm.agent.yaml' },
+    { patch: 'dev.principles.md', targets: ['dev.agent.yaml', 'dev.md'] },
+    { patch: 'architect.principles.md', targets: ['architect.agent.yaml', 'architect.md'] },
+    { patch: 'sm.principles.md', targets: ['sm.agent.yaml', 'sm.md'] },
   ];
 
-  for (const { patch, target } of patchMappings) {
+  for (const { patch, targets } of patchMappings) {
     const patchFile = path.join(patchesDir, patch);
-    const targetFile = path.join(bmadAgentsPath, target);
+    let injected = false;
 
-    if (fs.existsSync(targetFile) && fs.existsSync(patchFile)) {
-      const result = await injectIntoBmad(targetFile, patchFile);
-      if (result.injected) {
-        console.log(`  ✅ ${target} (${result.description})`);
-      } else if (result.skipped) {
-        console.log(`  ⏭️  ${target} (already has superpowers)`);
+    for (const target of targets) {
+      const targetFile = path.join(bmadAgentsPath, target);
+
+      if (fs.existsSync(targetFile) && fs.existsSync(patchFile)) {
+        const isYaml = target.endsWith('.yaml') || target.endsWith('.yml');
+        const result = isYaml
+          ? await injectIntoBmad(targetFile, patchFile)
+          : await injectIntoMarkdown(targetFile, patchFile);
+
+        if (result.injected) {
+          console.log(`  ✅ ${target} (${result.description})`);
+          injected = true;
+          break;
+        } else if (result.skipped) {
+          console.log(`  ⏭️  ${target} (already has superpowers)`);
+          injected = true;
+          break;
+        }
       }
-    } else if (!fs.existsSync(targetFile)) {
-      console.log(`  ⚠️  ${target} not found, skipping`);
+    }
+
+    if (!injected) {
+      console.log(`  ⚠️  ${targets.join(' or ')} not found, skipping`);
     }
   }
 
