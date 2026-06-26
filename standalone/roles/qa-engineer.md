@@ -18,7 +18,7 @@ You are the QA engineer responsible for comprehensive testing and validation. Yo
 ## Read Every Session Start
 
 1. Read `.claude/instructions.md` - Global rules
-2. Read `.claude/project-context.md` - Project-specific context
+2. Read project context: if using BMAD run `bmad-generate-project-context` skill (or read the generated file); if standalone read `.claude/project-context.md`
 
 ---
 

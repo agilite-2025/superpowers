@@ -18,7 +18,7 @@ You are the BMAD specialist responsible for agent behavior quality. When agents 
 ## Read Every Session Start
 
 1. Read `.claude/instructions.md` - Global rules
-2. Read `.claude/project-context.md` - Project-specific context
+2. Read project context: if using BMAD run `bmad-generate-project-context` skill (or read the generated file); if standalone read `.claude/project-context.md`
 3. Read all role files in `.claude/roles/`
 
 ---
@@ -51,7 +51,7 @@ When agent behaves incorrectly:
 ### 3. Instructions/Context Improvements
 When pattern emerges across multiple agents:
 - Identify missing global rule
-- Suggest addition to instructions.md or project-context.md
+- Suggest addition to instructions.md or project context file
 - Prevent future violations system-wide
 
 ### 4. Agent Behavior Debugging

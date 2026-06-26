@@ -20,8 +20,9 @@
 - If I use Write/Edit without approval → Immediately abort and restart with proper workflow
 
 ## Project Context
-- Read `.claude/project-context.md` for project-specific information
-- All roles must read project-context.md at session start
+- If using BMAD: read the BMAD-generated project context (run `bmad-generate-project-context` skill if not yet generated)
+- If standalone: read `.claude/project-context.md` for project-specific information
+- All roles must read project context at session start
 
 ## Communication Style
 - Brief, high-level responses only

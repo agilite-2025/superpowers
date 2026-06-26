@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import YAML from 'yaml';
 
 const SUPERPOWERS_START = '# --- SUPERPOWERS:START ---';
@@ -88,6 +89,43 @@ ${SUPERPOWERS_END}`;
   fs.writeFileSync(targetYamlPath, newYamlContent);
 
   return { injected: true, skipped: false, description };
+}
+
+export function injectViaBmadCustom(customDir, skillName, principleLines, activationSteps = []) {
+  const tomlPath = path.join(customDir, `${skillName}.toml`);
+
+  if (fs.existsSync(tomlPath)) {
+    const existing = fs.readFileSync(tomlPath, 'utf8');
+    if (existing.includes(SUPERPOWERS_START)) {
+      return { injected: false, skipped: true, description: 'already installed' };
+    }
+  }
+
+  const principlesBlock = principleLines
+    .map(line => `  "${line.replace(/^-\s*/, '').replace(/"/g, '\\"')}"`)
+    .join(',\n');
+
+  const stepsBlock = activationSteps
+    .map(step => `  "${step.replace(/"/g, '\\"')}"`)
+    .join(',\n');
+
+  const tomlContent = `${SUPERPOWERS_START}
+# Managed by superpowers package — do not edit this block manually
+
+[agent]
+principles = [
+${principlesBlock},
+]
+${activationSteps.length > 0 ? `\nactivation_steps_prepend = [\n${stepsBlock},\n]` : ''}
+${SUPERPOWERS_END}
+`;
+
+  if (!fs.existsSync(customDir)) {
+    fs.mkdirSync(customDir, { recursive: true });
+  }
+
+  fs.writeFileSync(tomlPath, tomlContent);
+  return { injected: true, skipped: false, description: `wrote ${skillName}.toml` };
 }
 
 export function removeSuperpowers(targetYamlPath) {
