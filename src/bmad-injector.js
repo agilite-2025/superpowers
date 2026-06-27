@@ -94,11 +94,10 @@ ${SUPERPOWERS_END}`;
 export function injectViaBmadCustom(customDir, skillName, principleLines, activationSteps = []) {
   const tomlPath = path.join(customDir, `${skillName}.toml`);
 
-  if (fs.existsSync(tomlPath)) {
-    const existing = fs.readFileSync(tomlPath, 'utf8');
-    if (existing.includes(SUPERPOWERS_START)) {
-      return { injected: false, skipped: true, description: 'already installed' };
-    }
+  const existingContent = fs.existsSync(tomlPath) ? fs.readFileSync(tomlPath, 'utf8') : '';
+
+  if (existingContent.includes(SUPERPOWERS_START)) {
+    return { injected: false, skipped: true, description: 'already installed' };
   }
 
   const principlesBlock = principleLines
@@ -109,7 +108,7 @@ export function injectViaBmadCustom(customDir, skillName, principleLines, activa
     .map(step => `  "${step.replace(/"/g, '\\"')}"`)
     .join(',\n');
 
-  const tomlContent = `${SUPERPOWERS_START}
+  const superpowersBlock = `${SUPERPOWERS_START}
 # Managed by superpowers package — do not edit this block manually
 
 [agent]
@@ -124,7 +123,12 @@ ${SUPERPOWERS_END}
     fs.mkdirSync(customDir, { recursive: true });
   }
 
-  fs.writeFileSync(tomlPath, tomlContent);
+  // Append to existing user content rather than overwriting, preserving their customizations
+  const newContent = existingContent
+    ? `${existingContent.trimEnd()}\n\n${superpowersBlock}`
+    : superpowersBlock;
+
+  fs.writeFileSync(tomlPath, newContent);
   return { injected: true, skipped: false, description: `wrote ${skillName}.toml` };
 }
 
