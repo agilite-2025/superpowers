@@ -118,7 +118,9 @@ async function installBMAD_v6(targetDir, skillsDir) {
 
   // Copy new superpowers skill dirs into .claude/skills/
   const bmadSkillsDir = path.join(PACKAGE_ROOT, 'src', 'bmad-skills');
-  if (fs.existsSync(bmadSkillsDir)) {
+  if (!fs.existsSync(bmadSkillsDir)) {
+    console.log(`  ⚠️  src/bmad-skills/ not found in package — skipping extra skill installation`);
+  } else {
     const newSkills = fs.readdirSync(bmadSkillsDir);
     for (const skillName of newSkills) {
       const src = path.join(bmadSkillsDir, skillName);

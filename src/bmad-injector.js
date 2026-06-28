@@ -92,6 +92,10 @@ ${SUPERPOWERS_END}`;
 }
 
 export function injectViaBmadCustom(customDir, skillName, principleLines, activationSteps = []) {
+  if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+    throw new Error(`Invalid skill name: "${skillName}" — must contain only letters, digits, hyphens, and underscores`);
+  }
+
   const tomlPath = path.join(customDir, `${skillName}.toml`);
 
   const existingContent = fs.existsSync(tomlPath) ? fs.readFileSync(tomlPath, 'utf8') : '';
