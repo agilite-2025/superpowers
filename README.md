@@ -33,12 +33,32 @@ npx @agilite-2025/superpowers
 
 ### What Happens
 
-The installer auto-detects your environment:
+The installer auto-detects your environment and picks the right mode:
 
-**If BMAD is installed:**
+**BMAD v6 + Claude Code** (detected by `_bmad/` dir + `.claude/skills/bmad-agent-*/SKILL.md`):
 ```
 🔍 Detecting environment...
-✅ BMAD v6 detected at ./src/bmm/
+✅ BMAD v6 (Claude Code) detected at: .claude/skills
+
+📦 Injecting superpowers into BMAD v6 agents via _bmad/custom/...
+  ✅ bmad-agent-dev (wrote bmad-agent-dev.toml)
+  ✅ bmad-agent-architect (wrote bmad-agent-architect.toml)
+  ⏭️  bmad-agent-pm not installed, skipping
+  ✅ Added: .claude/skills/superpowers-quality-architect/
+  ✅ Added: .claude/skills/superpowers-sdet/
+  ✅ .claude/instructions.md (guardrails)
+  ✅ .claude/roles/developer.md
+  ...
+
+🎉 Superpowers activated!
+```
+
+Writes non-destructive TOML override files to `_bmad/custom/` — your existing BMAD config is preserved and BMAD updates will never overwrite superpowers.
+
+**Legacy BMAD** (detected by `src/bmm/agents/`, `_bmad/bmm/agents/`, or `.bmad/agents/`):
+```
+🔍 Detecting environment...
+✅ BMAD detected at: ./_bmad/bmm/agents
 
 📦 Injecting superpowers into BMAD agents...
   ✅ dev.agent.yaml (Mental Model Execution)
@@ -51,7 +71,7 @@ The installer auto-detects your environment:
 🎉 Superpowers activated!
 ```
 
-**If Claude Code only (no BMAD):**
+**Claude Code only (no BMAD):**
 ```
 🔍 Detecting environment...
 ✅ Claude Code detected
@@ -63,6 +83,7 @@ The installer auto-detects your environment:
   ✅ .claude/roles/qa-engineer.md
   ✅ .claude/roles/sdet.md
   ✅ .claude/roles/orchestrator.md
+  ✅ .claude/project-context.md (template)
   ✅ CLAUDE.md
 
 🎉 Superpowers activated!
@@ -70,9 +91,17 @@ The installer auto-detects your environment:
 
 ## Usage
 
-### With BMAD
+### With BMAD v6 (Claude Code)
 
-Your existing BMAD agents are enhanced. Use them normally:
+Superpowers are injected via `_bmad/custom/*.toml` override files — BMAD's official customization layer. Your existing config is preserved and survives BMAD updates.
+
+- `bmad-agent-dev` gains Mental Model Execution + approval workflow principles
+- `bmad-agent-architect` gains Quality Architect mode principles
+- New skills added: `superpowers-quality-architect`, `superpowers-sdet`
+
+### With Legacy BMAD
+
+Your existing agent YAML/MD files are patched directly:
 - Developer now requires Mental Model Execution traces
 - Architect has Quality Architect mode
 - New agents: `quality-architect`, `sdet`
@@ -128,14 +157,15 @@ Every criticism includes:
 
 ## Uninstall
 
-Superpowers are marked with comments:
+Superpowers are marked with comments in every file they touch:
 ```
 # --- SUPERPOWERS:START ---
 ...
 # --- SUPERPOWERS:END ---
 ```
 
-To remove, delete content between these markers or reinstall BMAD.
+- **BMAD v6**: delete `_bmad/custom/bmad-agent-dev.toml` (and similar) and remove `.claude/skills/superpowers-*/`
+- **Legacy BMAD / Standalone**: delete the marked block from each patched file
 
 ## Requirements
 

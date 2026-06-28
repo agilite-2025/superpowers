@@ -13,126 +13,174 @@
 └─────────────────┬───────────────────┘
                   │
                   ▼
-        ┌─────────────────┐
-        │ BMAD installed? │
-        │ (src/bmm/agents │
-        │  or _bmad/)     │
-        └────────┬────────┘
-                 │
-        ┌────────┴────────┐
-        │                 │
-       YES               NO
-        │                 │
-        ▼                 ▼
-┌───────────────┐  ┌─────────────────┐
-│  BMAD MODE    │  │ Claude Code     │
-└───────┬───────┘  │ detected?       │
-        │          │ (.claude/ or    │
-        │          │  CLAUDE.md)     │
-        │          └────────┬────────┘
-        │                   │
-        │          ┌────────┴────────┐
-        │          │                 │
-        │         YES               NO
-        │          │                 │
-        │          ▼                 ▼
-        │   ┌─────────────┐  ┌─────────────┐
-        │   │ STANDALONE  │  │ STANDALONE  │
-        │   │ MODE        │  │ MODE        │
-        │   │ (existing)  │  │ (fresh)     │
-        │   └──────┬──────┘  └──────┬──────┘
-        │          │                │
-        │          └────────┬───────┘
-        │                   │
-        ▼                   ▼
-┌───────────────────┐ ┌───────────────────┐
-│ BMAD INJECTION    │ │ STANDALONE INSTALL│
-├───────────────────┤ ├───────────────────┤
-│                   │ │                   │
-│ For each agent:   │ │ Create .claude/   │
-│ ┌───────────────┐ │ │ if not exists     │
-│ │dev.agent.yaml │ │ │                   │
-│ │    ↓          │ │ │ Copy files:       │
-│ │Has SUPERPOWERS│ │ │ ┌───────────────┐ │
-│ │marker?        │ │ │ │instructions.md│ │
-│ │  YES → Skip   │ │ │ │roles/         │ │
-│ │  NO  → Inject │ │ │ │ developer.md  │ │
-│ └───────────────┘ │ │ │ quality-*.md  │ │
-│                   │ │ │ qa-engineer.md│ │
-│ Add new agents:   │ │ │ sdet.md       │ │
-│ • quality-arch.yaml│ │ │ orchestrator.md│ │
-│ • sdet.agent.yaml │ │ └───────────────┘ │
-│                   │ │                   │
-│ Install guardrails│ │ Create CLAUDE.md  │
-│ to .claude/       │ │ if not exists     │
-└─────────┬─────────┘ └─────────┬─────────┘
-          │                     │
-          └──────────┬──────────┘
-                     │
-                     ▼
-          ┌─────────────────────┐
-          │ 🎉 Superpowers      │
-          │    Activated!       │
-          └─────────────────────┘
+        ┌──────────────────────┐
+        │ BMAD v6 detected?    │
+        │ (_bmad/ dir exists   │
+        │  AND .claude/skills/ │
+        │  has bmad-agent-*    │
+        │  /SKILL.md)          │
+        └──────────┬───────────┘
+                   │
+          ┌────────┴────────┐
+          │                 │
+         YES               NO
+          │                 │
+          ▼                 ▼
+┌──────────────┐   ┌──────────────────┐
+│ BMAD V6 MODE │   │ Legacy BMAD?     │
+└──────┬───────┘   │ (src/bmm/agents/ │
+       │           │  _bmad/bmm/agents│
+       │           │  .bmad/agents/)  │
+       │           └────────┬─────────┘
+       │                    │
+       │           ┌────────┴────────┐
+       │           │                 │
+       │          YES               NO
+       │           │                 │
+       │           ▼                 ▼
+       │   ┌──────────────┐  ┌──────────────────┐
+       │   │ LEGACY BMAD  │  │ Claude Code?     │
+       │   │ MODE         │  │ (.claude/ or     │
+       │   └──────┬───────┘  │  CLAUDE.md)      │
+       │          │          └────────┬──────────┘
+       │          │                   │
+       │          │          ┌────────┴────────┐
+       │          │          │                 │
+       │          │         YES               NO
+       │          │          │                 │
+       │          │          ▼                 ▼
+       │          │  ┌─────────────┐  ┌─────────────┐
+       │          │  │ STANDALONE  │  │ STANDALONE  │
+       │          │  │ (existing)  │  │ (fresh)     │
+       │          │  └──────┬──────┘  └──────┬──────┘
+       │          │         └────────┬────────┘
+       ▼          ▼                  ▼
+┌────────────┐ ┌────────────┐ ┌────────────────────┐
+│ BMAD V6    │ │ LEGACY     │ │ STANDALONE INSTALL │
+│ INSTALL    │ │ BMAD       │ ├────────────────────┤
+├────────────┤ │ INJECTION  │ │ Create .claude/    │
+│            │ ├────────────┤ │                    │
+│ Write TOML │ │            │ │ Copy:              │
+│ overrides  │ │ For each   │ │ • instructions.md  │
+│ to         │ │ agent:     │ │ • roles/*.md       │
+│ _bmad/     │ │ • dev      │ │ • project-         │
+│ custom/    │ │ • architect│ │   context.md       │
+│            │ │ • sm       │ │   (template)       │
+│ • bmad-    │ │            │ │                    │
+│   agent-   │ │ Inject     │ │ Create CLAUDE.md   │
+│   dev.toml │ │ principles │ │ if not exists      │
+│ • bmad-    │ │ into YAML  │ └────────────────────┘
+│   agent-   │ │ or .md     │
+│   arch.toml│ │            │
+│ • bmad-    │ │ Add new    │
+│   agent-   │ │ agents:    │
+│   pm.toml  │ │ • quality- │
+│            │ │   arch.yaml│
+│ Add new    │ │ • sdet.yaml│
+│ skills to  │ └──────┬─────┘
+│ .claude/   │        │
+│ skills/:   │        │
+│ • superpow │        │
+│   ers-qa   │        │
+│ • superpow │        │
+│   ers-sdet │        │
+│            │        │
+│ Install    │        │
+│ guardrails │        │
+│ + roles to │        │
+│ .claude/   │        │
+└──────┬─────┘        │
+       │              │
+       └──────┬───────┘
+              │
+              ▼
+   ┌─────────────────────┐
+   │ 🎉 Superpowers      │
+   │    Activated!       │
+   └─────────────────────┘
 ```
 
 ---
 
-## Injection Logic (BMAD Mode)
+## BMAD v6 Injection Logic
 
 ```
-┌────────────────────────────────┐
-│ For each patch file:           │
-│ (dev, architect, sm)           │
-└───────────────┬────────────────┘
-                │
-                ▼
-┌────────────────────────────────┐
-│ Read target .agent.yaml        │
-└───────────────┬────────────────┘
-                │
-                ▼
-        ┌───────────────┐
-        │ Contains      │
-        │ SUPERPOWERS   │
-        │ marker?       │
-        └───────┬───────┘
-                │
-       ┌────────┴────────┐
-       │                 │
-      YES               NO
-       │                 │
-       ▼                 ▼
-┌─────────────┐  ┌─────────────────┐
-│ SKIP        │  │ Parse YAML      │
-│ (already    │  │ Find persona.   │
-│ installed)  │  │ principles      │
-└─────────────┘  │ Append patch    │
-                 │ with markers    │
-                 │ Write file      │
-                 └─────────────────┘
+┌──────────────────────────────────────┐
+│ For each target skill:               │
+│ (bmad-agent-dev, bmad-agent-         │
+│  architect, bmad-agent-pm)           │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+        ┌──────────────────────┐
+        │ Skill installed in   │
+        │ .claude/skills/?     │
+        └──────────┬───────────┘
+                   │
+          ┌────────┴────────┐
+          │                 │
+         YES               NO
+          │                 │
+          ▼                 ▼
+┌──────────────────┐  ┌──────────────┐
+│ Read patch file  │  │ Skip + log   │
+│ from src/patches/│  └──────────────┘
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────────────────────────┐
+│ _bmad/custom/{skill}.toml exists?    │
+└──────────────────┬───────────────────┘
+                   │
+          ┌────────┴────────┐
+          │                 │
+         YES               NO
+          │                 │
+          ▼                 ▼
+  ┌───────────────┐  ┌─────────────────────┐
+  │ Has SUPERPOW- │  │ Create file with    │
+  │ ERS marker?   │  │ superpowers block   │
+  └───────┬───────┘  └─────────────────────┘
+          │
+ ┌────────┴────────┐
+ │                 │
+YES               NO
+ │                 │
+ ▼                 ▼
+Skip         Append superpowers
+(idempotent) block to existing
+             user content
+             (preserves their config)
 ```
 
 ---
 
 ## Detection Paths
 
-| Path Checked        | Mode Triggered          |
-| ------------------- | ----------------------- |
-| `src/bmm/agents/`   | BMAD Mode               |
-| `_bmad/bmm/agents/` | BMAD Mode               |
-| `.bmad/agents/`     | BMAD Mode               |
-| `.claude/`          | Standalone Mode         |
-| `CLAUDE.md`         | Standalone Mode         |
-| None found          | Standalone Mode (fresh) |
+| Priority | Path(s) Checked | Mode Triggered |
+|----------|-----------------|----------------|
+| 1st | `_bmad/` dir **AND** `.claude/skills/bmad-agent-*/SKILL.md` | **BMAD v6 Mode** |
+| 2nd | `src/bmm/agents/`, `_bmad/bmm/agents/`, `.bmad/agents/` | Legacy BMAD Mode |
+| 3rd | `.claude/` or `CLAUDE.md` | Standalone Mode (existing) |
+| 4th | None found | Standalone Mode (fresh) |
 
 ---
 
 ## Files Installed
 
-### BMAD Mode
+### BMAD v6 Mode
 
-- Injects into: `dev.agent.yaml`, `architect.agent.yaml`, `sm.agent.yaml`
+- Writes: `_bmad/custom/bmad-agent-dev.toml`
+- Writes: `_bmad/custom/bmad-agent-architect.toml`
+- Writes: `_bmad/custom/bmad-agent-pm.toml` (if skill installed)
+- Adds: `.claude/skills/superpowers-quality-architect/`
+- Adds: `.claude/skills/superpowers-sdet/`
+- Creates: `.claude/instructions.md`
+- Creates: `.claude/roles/*.md`
+
+### Legacy BMAD Mode
+
+- Injects into: `dev.agent.yaml` / `dev.md`, `architect.agent.yaml` / `architect.md`, `sm.agent.yaml` / `sm.md`
 - Adds: `quality-architect.agent.yaml`, `sdet.agent.yaml`
 - Creates: `.claude/instructions.md`
 
@@ -144,15 +192,17 @@
 - `.claude/roles/qa-engineer.md`
 - `.claude/roles/sdet.md`
 - `.claude/roles/orchestrator.md`
+- `.claude/project-context.md` (editable template)
 - `CLAUDE.md` (if not exists)
 
 ---
 
 ## Idempotency
 
-All operations check for `SUPERPOWERS` marker before modifying:
+All operations check for the `SUPERPOWERS` marker before writing:
 
-- If marker exists → Skip (already installed)
-- If marker absent → Install/Inject
+- Marker present → Skip (already installed)
+- File exists, no marker → Append superpowers block (preserves existing content)
+- File absent → Create new file
 
-This allows safe re-running of the installer.
+Safe to re-run the installer at any time.
