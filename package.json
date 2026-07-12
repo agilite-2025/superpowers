@@ -1,6 +1,6 @@
 {
-  "name": "@agilite-2025/superpowers",
-  "version": "1.1.0",
+  "name": "@tongsitat/superpowers",
+  "version": "1.2.0",
   "description": "Superpower enhancements for BMAD Method and Claude Code",
   "type": "module",
   "main": "src/installer.js",
@@ -17,11 +17,11 @@
     "agents",
     "development"
   ],
-  "author": "agilite-2025",
+  "author": "tongsitat",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/agilite-2025/superpowers.git"
+    "url": "https://github.com/tongsitat/superpowers.git"
   },
   "engines": {
     "node": ">=18.0.0"

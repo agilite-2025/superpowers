@@ -28,8 +28,24 @@ Superpower enhancements for [BMAD Method](https://github.com/bmad-code-org/BMAD-
 ### Quick Install (npx)
 
 ```bash
-npx @agilite-2025/superpowers
+npx @tongsitat/superpowers
 ```
+
+### Verify Installation
+
+After install (or when a new team member checks out the repo), confirm superpowers are active:
+
+```bash
+npx @tongsitat/superpowers verify
+```
+
+This checks four layers:
+1. TOML override files exist in `_bmad/custom/`
+2. SUPERPOWERS markers are present in each file
+3. BMAD's resolver confirms principles appear in merged agent output
+4. Scans for new `bmad-agent-*` skills that aren't yet covered
+
+Exits 0 if all good (CI-safe). Exits 1 with actionable output if anything is broken or missing.
 
 ### What Happens
 
