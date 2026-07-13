@@ -15,6 +15,13 @@ const TARGET_SKILLS = ['bmad-agent-dev', 'bmad-agent-architect', 'bmad-agent-pm'
 const SUPERPOWERS_SKILLS = ['superpowers-quality-architect', 'superpowers-sdet'];
 const ROLE_FILES = ['developer.md', 'quality-architect.md', 'qa-engineer.md', 'sdet.md', 'orchestrator.md'];
 
+// Non-execution agents — planning/design/docs phase, intentionally not superpowered
+const INTENTIONALLY_SKIPPED_SKILLS = [
+  'bmad-agent-analyst',
+  'bmad-agent-tech-writer',
+  'bmad-agent-ux-designer',
+];
+
 let errors = 0;
 let warnings = 0;
 
@@ -209,14 +216,18 @@ function checkLayer4Coverage(skillsDir, customDir) {
     fs.existsSync(path.join(skillsDir, name, 'SKILL.md'))
   );
 
-  const uncovered = bmadAgentSkills.filter(skill =>
+  // Only warn about execution-phase skills not in our target list or the intentional skip list
+  const unknownUncovered = bmadAgentSkills.filter(skill =>
+    !TARGET_SKILLS.includes(skill) &&
+    !INTENTIONALLY_SKIPPED_SKILLS.includes(skill) &&
     !fs.existsSync(path.join(customDir, `${skill}.toml`))
   );
 
-  if (uncovered.length === 0) {
-    pass(`All ${bmadAgentSkills.length} bmad-agent-* skill(s) are covered`);
-  } else {
-    warn(`Uncovered BMAD skills (new since last install): ${uncovered.join(', ')}`);
-    console.log(`     Run \`npx @tongsitat/superpowers\` to inject superpowers into these skills.`);
+  const skippedCount = bmadAgentSkills.filter(s => INTENTIONALLY_SKIPPED_SKILLS.includes(s)).length;
+  pass(`Execution agents covered (${skippedCount} non-execution agent(s) intentionally skipped)`);
+
+  if (unknownUncovered.length > 0) {
+    warn(`Unknown new BMAD execution skills detected: ${unknownUncovered.join(', ')}`);
+    console.log(`     These may be new execution-phase agents. Review and add to installer if appropriate.`);
   }
 }
