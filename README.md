@@ -2,6 +2,8 @@
 
 Superpower enhancements for [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) and Claude Code.
 
+> Maintained fork of [agilite-2025/superpowers](https://github.com/agilite-2025/superpowers) — extended with BMAD v6.9 compatibility.
+
 ## What's Included
 
 ### Core Superpowers
@@ -194,4 +196,8 @@ MIT
 
 ## Contributing
 
-Issues and PRs welcome at [github.com/agilite-2025/superpowers](https://github.com/agilite-2025/superpowers)
+Issues and PRs welcome at [github.com/tongsitat/superpowers](https://github.com/tongsitat/superpowers)
+
+## Credits
+
+This project is a maintained fork of [agilite-2025/superpowers](https://github.com/agilite-2025/superpowers) by [@agilite-2025](https://github.com/agilite-2025), extended with BMAD v6.9 compatibility and the `verify` subcommand.
